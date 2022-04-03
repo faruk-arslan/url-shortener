@@ -1,7 +1,9 @@
-package url-shortener
+package urlshortener
 
 import (
 	"net/http"
+  "fmt"
+  // "gopkg.in/yaml.v3"
 )
 
 // MapHandler will return an http.HandlerFunc (which also
@@ -12,7 +14,7 @@ import (
 // http.Handler will be called instead.
 func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc {
 	return func (w http.ResponseWriter, r *http.Request){
-    path:= r.URL.path
+    path := r.URL.Path
     elem, ok := pathsToUrls[path]
     if(ok){
       fmt.Println(elem)
@@ -39,7 +41,29 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 //
 // See MapHandler to create a similar http.HandlerFunc via
 // a mapping of paths to urls.
-func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	// TODO: Implement this...
-	return nil, nil
+type StructPath struct {
+	Path string `yaml:"path"`
 }
+
+type StructUrl struct {
+	// Embedded structs are not treated as embedded in YAML by default. To do that,
+	// add the ",inline" annotation below
+	StructPath `yaml:",inline"`
+	Url       string `yaml:"url"`
+}
+
+// func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
+//   return func (w http.ResponseWriter, r *http.Request){
+//     var url StructUrl
+//     err := yaml.Unmarshal([]byte(yml), &url)
+//     if err != nil {
+//       fallback.ServeHTTP(w, r)
+//     }
+//     fmt.Println(url.Path)
+//   	fmt.Println(url.Url)
+//     http.Redirect(w, r, url.Url, http.StatusFound)
+//     return
+//   }
+//
+//
+// }

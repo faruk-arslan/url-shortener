@@ -48,18 +48,29 @@ type pathUrl struct{
 
 func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 	// Parse the yaml.
-	var pathUrls []pathUrl
-	err := yaml.Unmarshal(yml, &pathUrls)
+	pathUrls, err := parseYaml(yml)
 	if(err != nil){
 		return nil, err
 	}
 	// Convert yaml to map (to use map handler)
+	pathUrlMap := yamlToMap(pathUrls)
+	// Return the mapp handler
+	return MapHandler(pathUrlMap, fallback), nil
+}
+
+func parseYaml(yamlData []byte)([]pathUrl, error) {
+	var pathUrls []pathUrl
+	err := yaml.Unmarshal(yamlData, &pathUrls)
+	if(err != nil){
+		return nil, err
+	}
+	return pathUrls, nil
+}
+
+func yamlToMap(pathUrls []pathUrl) (map[string]string){
 	pathUrlMap := make(map[string]string)
 	for _, p := range pathUrls{
 		pathUrlMap[p.Path]=p.URL
 	}
-	// Return the mapp handler
-	return MapHandler(pathUrlMap, fallback), nil
-
-
+	return pathUrlMap
 }
